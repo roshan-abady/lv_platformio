@@ -12,7 +12,8 @@
 #include "lvgl.h"
 #include "app_hal.h"
 
-#include "demos/lv_demos.h"
+
+#include "ui.h"
 
 int main(void)
 {
@@ -20,7 +21,12 @@ int main(void)
 
 	hal_setup();
 
-  lv_demo_widgets();
+  ui_init();
+
+  //lv_demo_benchmark();
+  //lv_demo_music();
+
+  openLock();
 
 	hal_loop();
 }
