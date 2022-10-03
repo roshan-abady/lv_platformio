@@ -9,6 +9,9 @@ This demo should help you to organize your project with awesome PlatformIO IDE.
 2. It contains working LittlevGL demo, runnable on both are metal and PC.
 3. It has example, how to configure PlatomIO.
 
+## ESP32 WT32-SC01 Demo
+
+<img src="https://github.com/fbiego/Lumia-ESP32/raw/main/simulation.gif" width="320" height="480" alt="simulator video"/>
 
 ## How to install & use demo
 
