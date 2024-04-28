@@ -177,8 +177,8 @@ drag notification;
 
 typedef struct AlertDialog
 {
-    char *title;
-    char *message;
+    const char *title;
+    const char *message;
     uint16_t code;
 } Alert;
 
@@ -276,8 +276,8 @@ static void event_handler(lv_event_t *e)
         if (obj == ui_appWifiButton)
         {
             int index = lv_dropdown_get_selected(ui_appWifiSelect);
-            char *name = lv_textarea_get_text(ui_appWifiName);
-            char *pass = lv_textarea_get_text(ui_appWifiPass);
+            const char *name = lv_textarea_get_text(ui_appWifiName);
+            const char *pass = lv_textarea_get_text(ui_appWifiPass);
             alert.title = name;
             alert.message = "WiFi Saved";
             showAlert(&ui_img_gear_png, true, 200, 0x00);
@@ -599,7 +599,7 @@ static void event_alert(lv_event_t *e)
 {
     lv_obj_t *obj = lv_event_get_current_target(e);
     lv_event_code_t code = lv_event_get_code(e);
-    uint32_t id = (uint32_t)lv_event_get_user_data(e);
+    uintptr_t id = (uintptr_t)lv_event_get_user_data(e);
     uint16_t pId = id >> 0x10 & 0xFFFF;
     uint16_t oId = id & 0xFFFF;
 
@@ -617,53 +617,53 @@ static void event_launch(lv_event_t *e)
         char *data = (char *)lv_event_get_user_data(e);
         // printf("App name: %s\n", data);
 
-        if (data == "WiFi")
+        if (strcmp(data, "WiFi") == 0)
         {
             openAppWifi();
         }
-        else if (data == "Phone")
+        else if (strcmp(data, "Phone") == 0)
         {
             openPhone();
         }
-        else if (data == "Calendar")
+        else if (strcmp(data, "Calendar") == 0)
         {
             openAppCalendar();
         }
-        else if (data == "Test App")
+        else if (strcmp(data, "Test App") == 0)
         {
             //loadTestApp();
         }
-        else if (data == "Store")
+        else if (strcmp(data, "Store") == 0)
         {
             openAppStore();
         }
-        else if (data == "About")
+        else if (strcmp(data, "About") == 0)
         {
             openAppAbout();
         }
-        else if (data == "Power Off")
+        else if (strcmp(data, "Power Off") == 0)
         {
             //deep_sleep();
         }
-        else if (data == "Sleep")
+        else if (strcmp(data, "Sleep") == 0)
         {
             //light_sleep();
         }
-        else if (data == "Lock Screen")
+        else if (strcmp(data, "Lock Screen") == 0)
         {
             openLock();
         }
-        else if (data == "Messaging")
+        else if (strcmp(data, "Messaging") == 0)
         {
             openMessage();
         }
-        else if (data == "Receive Call"){
+        else if (strcmp(data, "Receive Call") == 0){
             showCaller("ESP32", "", true);
         }
-        else if (data == "Receive SMS"){
+        else if (strcmp(data, "Receive SMS") == 0){
             showNotification("Message", &ui_img_237043237, "ESP32\nTest message, click to close");
         }
-        else if (data == "Chat")
+        else if (strcmp(data, "Chat") == 0)
         {
             openChat();
         }
@@ -710,7 +710,7 @@ static void event_lockcode(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t *ta = lv_event_get_target(e);
-    uint32_t id = (uint32_t)lv_event_get_user_data(e);
+    uintptr_t id = (uintptr_t)lv_event_get_user_data(e);
     uint16_t pId = id >> 0x10 & 0xFFFF;
     uint16_t oId = id & 0xFFFF;
 
@@ -738,9 +738,9 @@ static void event_appstore_install(lv_event_t *e)
 
     if (code == LV_EVENT_CLICKED)
     {
-        int id = (int)lv_event_get_user_data(e);
+        uintptr_t id = (uintptr_t)lv_event_get_user_data(e);
         alert.title = "Install";
-        printf("%d\n", id);
+        printf("%d\n", (int)id);
         alert.message = "Feature is not currently available\nComing soon";
 
         showAlert(&ui_img_gear_png, true, 200, 0x00);
@@ -754,7 +754,7 @@ static void event_appstore_uninstall(lv_event_t *e)
 
     if (code == LV_EVENT_CLICKED)
     {
-        int id = (int)lv_event_get_user_data(e);
+        uintptr_t id = (uintptr_t)lv_event_get_user_data(e);
         alert.title = "Uninstall";
         alert.message = "Feature is not currently available\nComing soon";
 
@@ -771,7 +771,7 @@ static void event_app_component(lv_event_t *e)
 
     if (code == LV_EVENT_CLICKED)
     {
-        uint32_t id = (uint32_t)lv_event_get_user_data(e);
+        uintptr_t id = (uintptr_t)lv_event_get_user_data(e);
         uint16_t pId = id >> 0x10 & 0xFFFF;
         uint16_t oId = id & 0xFFFF;
         printf("PID 0x%X\n", pId);
@@ -838,7 +838,7 @@ static void event_app_component(lv_event_t *e)
                 // direct unlock
                 uint8_t pass[4];
                 const char *cd = lv_textarea_get_text(ui_lockScreenCode);
-                strncpy(pass, cd, 4);
+                strncpy((char*)pass, cd, 4);
                 int i;
                 for (i = 0; i < 4; i++)
                 {
@@ -877,7 +877,7 @@ static void event_app_component(lv_event_t *e)
                 printf("%s\n", cd);
                 if (strlen(cd) == 4)
                 {
-                    strncpy(passcode.code, cd, 4);
+                    strncpy((char*)passcode.code, cd, 4);
                     passcode.set = true;
                 }
                 else
@@ -956,7 +956,7 @@ void create_action_tile(lv_obj_t *parent, char *name, const void *src, bool chec
     lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, col, size, LV_GRID_ALIGN_STRETCH, row, 1);
     lv_obj_add_flag(obj, LV_OBJ_FLAG_CHECKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-    lv_obj_add_event_cb(obj, callback, LV_EVENT_VALUE_CHANGED, 10);
+    lv_obj_add_event_cb(obj, callback, LV_EVENT_VALUE_CHANGED, (void *)10);
 
     if (!checked)
     {
@@ -1071,7 +1071,7 @@ void add_app(lv_obj_t *parent, struct AppStore app)
     lv_obj_add_flag(ui_appListAction, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
     lv_obj_clear_flag(ui_appListAction, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
     lv_obj_set_style_radius(ui_appListAction, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_add_event_cb(ui_appListAction, app.installed ? event_appstore_uninstall : event_appstore_install, LV_EVENT_CLICKED, app.id);
+    lv_obj_add_event_cb(ui_appListAction, app.installed ? event_appstore_uninstall : event_appstore_install, LV_EVENT_CLICKED, (void*)(uintptr_t)app.id);
 
     lv_obj_t *ui_appListActionLabel = lv_label_create(ui_appListAction);
     lv_obj_set_width(ui_appListActionLabel, LV_SIZE_CONTENT);  /// 1
@@ -1129,7 +1129,7 @@ lv_obj_t *create_button(lv_obj_t *parent, uint32_t id, const char *text, uint16_
     lv_obj_add_flag(button, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
     lv_obj_clear_flag(button, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
     lv_obj_set_style_radius(button, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_add_event_cb(button, event_app_component, LV_EVENT_CLICKED, id);
+    lv_obj_add_event_cb(button, event_app_component, LV_EVENT_CLICKED, (void*)(uintptr_t)id);
 
     lv_obj_t *label = lv_label_create(button);
     lv_obj_set_width(label, LV_SIZE_CONTENT);  /// 1
@@ -1148,7 +1148,7 @@ lv_obj_t *create_slider(lv_obj_t *parent, uint32_t id, uint16_t xPos, uint16_t y
     lv_obj_set_height(slider, height);
     lv_obj_set_x(slider, xPos);
     lv_obj_set_y(slider, yPos);
-    lv_obj_add_event_cb(slider, event_app_component, LV_EVENT_VALUE_CHANGED, id);
+    lv_obj_add_event_cb(slider, event_app_component, LV_EVENT_VALUE_CHANGED, (void*)(uintptr_t)id);
     return slider;
 }
 
@@ -1157,7 +1157,7 @@ lv_obj_t *create_switch(lv_obj_t *parent, uint32_t id, uint16_t xPos, uint16_t y
     lv_obj_t *switcH = lv_switch_create(parent);
     lv_obj_set_x(switcH, xPos);
     lv_obj_set_y(switcH, yPos);
-    lv_obj_add_event_cb(switcH, event_app_component, LV_EVENT_VALUE_CHANGED, id);
+    lv_obj_add_event_cb(switcH, event_app_component, LV_EVENT_VALUE_CHANGED, (void*)(uintptr_t)id);
     return switcH;
 }
 
@@ -1223,6 +1223,29 @@ lv_obj_t *add_message_item(lv_obj_t *parent, const char *sender, const char *mes
     lv_obj_set_align(ui_messageIcon, LV_ALIGN_LEFT_MID);
     lv_obj_add_flag(ui_messageIcon, LV_OBJ_FLAG_ADV_HITTEST);  /// Flags
     lv_obj_clear_flag(ui_messageIcon, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+    lv_obj_t *ui_chatItem = lv_obj_create(parent);
+    lv_obj_set_width(ui_chatItem, 320);
+    lv_obj_set_height(ui_chatItem, LV_SIZE_CONTENT); /// 50
+    lv_obj_set_x(ui_chatItem, 0);
+    lv_obj_set_y(ui_chatItem, 0);
+    lv_obj_set_align(ui_chatItem, LV_ALIGN_CENTER);
+    lv_obj_clear_flag(ui_chatItem, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+    lv_obj_set_style_radius(ui_chatItem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_chatItem, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_chatItem, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_chatItem, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_pad_left(ui_chatItem, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_chatItem, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_chatItem, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_chatItem, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_chatItemBg = lv_obj_create(ui_chatItem);
+
+    lv_obj_set_width(ui_chatItemBg, 200);
+    lv_obj_set_height(ui_chatItemBg, LV_SIZE_CONTENT); /// 50
+
+    return ui_chatItem;
 }
 
 lv_obj_t *add_chat_item(lv_obj_t *parent, const char *message, bool dir)
@@ -1264,6 +1287,26 @@ lv_obj_t *add_chat_item(lv_obj_t *parent, const char *message, bool dir)
     lv_obj_set_height(ui_chatText, LV_SIZE_CONTENT); /// 1
     lv_label_set_text(ui_chatText, message);
     lv_obj_set_style_text_font(ui_chatText, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_t *container = lv_obj_create(ui_appPanel);
+    lv_obj_set_width(container, 320);
+    lv_obj_set_height(container, LV_SIZE_CONTENT); /// 50
+    lv_obj_set_align(container, LV_ALIGN_TOP_MID);
+    lv_obj_clear_flag(container, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+    lv_obj_set_scrollbar_mode(container, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_style_radius(container, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(container, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(container, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(container, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(container, 70, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(container, 40, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_radius(container, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(container, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(container, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_width(container, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_pad(container, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    return container;
 }
 
 ///////////////////// MODULES ////////////////////
@@ -1695,7 +1738,7 @@ lv_obj_t *keypad(lv_obj_t *parent, int offset, uint8_t id)
         lv_obj_set_style_text_font(button, &lv_font_montserrat_34, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_bg_color(button, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
         lv_obj_set_style_bg_opa(button, 50, LV_PART_MAIN | LV_STATE_PRESSED);
-        lv_obj_add_event_cb(button, event_app_component, LV_EVENT_CLICKED, uuid((KEYPAD | id), lb));
+        lv_obj_add_event_cb(button, event_app_component, LV_EVENT_CLICKED, (void *)(uintptr_t)uuid((KEYPAD | id), lb));
     }
 
     return key;
@@ -1717,7 +1760,7 @@ void notification_alert(lv_obj_t *parent){
     lv_obj_set_style_border_opa(ui_notificationAlert, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_notificationAlert, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_side(ui_notificationAlert, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_add_event_cb(ui_notificationAlert, event_app_component, LV_EVENT_CLICKED, uuid(0xABCD, 0x1234));
+    lv_obj_add_event_cb(ui_notificationAlert, event_app_component, LV_EVENT_CLICKED, (void *)(uintptr_t)uuid(0xABCD, 0x1234));
 
     ui_notificationAppIcon = lv_img_create(ui_notificationAlert);
     lv_img_set_src(ui_notificationAppIcon, &ui_img_237043237);
@@ -1787,7 +1830,7 @@ void caller_screen(lv_obj_t *parent){
     lv_obj_add_flag(ui_callAnswerButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_callAnswerButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_radius(ui_callAnswerButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_add_event_cb(ui_callAnswerButton, event_app_component, LV_EVENT_CLICKED, uuid((KEYPAD | PHONE), 0xFD));
+    lv_obj_add_event_cb(ui_callAnswerButton, event_app_component, LV_EVENT_CLICKED, (void *)(uintptr_t)uuid((KEYPAD | PHONE), 0xFD));
 
     ui_callAnswerLabel = lv_label_create(ui_callAnswerButton);
     lv_obj_set_width(ui_callAnswerLabel, LV_SIZE_CONTENT);   /// 1
@@ -1827,7 +1870,7 @@ void caller_screen(lv_obj_t *parent){
     lv_obj_set_height(ui_callDeclineText, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_callDeclineText, LV_ALIGN_CENTER);
     lv_label_set_text(ui_callDeclineText, "Decline");
-    lv_obj_add_event_cb(ui_callDeclineButton, event_app_component, LV_EVENT_CLICKED, uuid((KEYPAD | PHONE), 0xFE));
+    lv_obj_add_event_cb(ui_callDeclineButton, event_app_component, LV_EVENT_CLICKED, (void *)(uintptr_t)uuid((KEYPAD | PHONE), 0xFE));
 }
 
 
@@ -2263,7 +2306,7 @@ void ui_lockScreen_screen_init(void)
     lv_obj_set_style_bg_color(ui_lockScreenCode, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_lockScreenCode, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_lockScreenCode, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_add_event_cb(ui_lockScreenCode, event_lockcode, LV_EVENT_ALL, uuid((KEYPAD | LOCK), 0xFFFF));
+    lv_obj_add_event_cb(ui_lockScreenCode, event_lockcode, LV_EVENT_ALL, (void *)(uintptr_t)uuid((KEYPAD | LOCK), 0xFFFF));
 
     ui_lockPanel = keypad(ui_lockScreenPanel, 0, LOCK);
     notification_alert(ui_lockScreen);
@@ -2535,7 +2578,7 @@ void ui_settingsScreen_screen_init(void)
     lv_obj_set_style_radius(ui_lockPass, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_lockPass, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_lockPass, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_add_event_cb(ui_lockPass, event_lockcode, LV_EVENT_ALL, uuid((KEYPAD | SETTINGS), 0xFFFF));
+    lv_obj_add_event_cb(ui_lockPass, event_lockcode, LV_EVENT_ALL, (void*)(uintptr_t)uuid((KEYPAD | SETTINGS), 0xFFFF));
 
     ui_storageLabel = lv_label_create(ui_settingsScroll);
     lv_obj_set_width(ui_storageLabel, LV_SIZE_CONTENT);  /// 1
@@ -2728,7 +2771,7 @@ void ui_appScreen_screen_init(void)
     lv_obj_set_align(ui_messageSendButton, LV_ALIGN_BOTTOM_RIGHT);
     lv_obj_add_flag(ui_messageSendButton, LV_OBJ_FLAG_CLICKABLE); /// Flags
     lv_obj_set_ext_click_area(ui_messageSendButton, 10);
-    lv_obj_add_event_cb(ui_messageSendButton, event_app_component, LV_EVENT_CLICKED, uuid(0xCCCC, 0x0001));
+    lv_obj_add_event_cb(ui_messageSendButton, event_app_component, LV_EVENT_CLICKED, (void*)(uintptr_t)uuid(0xCCCC, 0x0001));
 
     appWifi();
     appCalendar();
@@ -2868,7 +2911,7 @@ void openPhone()
     lv_obj_add_flag(ui_phoneNumberDelete, LV_OBJ_FLAG_CLICKABLE); /// Flags
     lv_obj_set_align(ui_phoneNumberDelete, LV_ALIGN_RIGHT_MID);
     lv_obj_set_ext_click_area(ui_phoneNumberDelete, 10);
-    lv_obj_add_event_cb(ui_phoneNumberDelete, event_app_component, LV_EVENT_CLICKED, uuid((KEYPAD | PHONE), 0x0D));
+    lv_obj_add_event_cb(ui_phoneNumberDelete, event_app_component, LV_EVENT_CLICKED, (void *)(uintptr_t)uuid((KEYPAD | PHONE), 0x0D));
 
     launchApp("Phone", &ui_img_1276322231, false);
 }
@@ -2955,7 +2998,7 @@ void showAlert(const void *src, bool state, int size, uint16_t code)
         lv_img_set_src(ui_alertIcon, src);
         lv_obj_set_height(ui_alertPanelDialog, size);
         lv_obj_set_height(ui_alertScroll, size - 100);
-        lv_obj_add_event_cb(ui_alertButton, event_alert, LV_EVENT_CLICKED, uuid(ALERT, code));
+        lv_obj_add_event_cb(ui_alertButton, event_alert, LV_EVENT_CLICKED, (void*)(uintptr_t)uuid(ALERT, code));
 
         lv_obj_clear_flag(ui_alertPanel, LV_OBJ_FLAG_HIDDEN);
     }
